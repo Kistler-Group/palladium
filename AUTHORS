@@ -1,0 +1,19 @@
+# This is the list of Palladiums authors.
+
+# Names should be added to this file as one of
+#     Organization's name
+#     Individual's name <submission email address>
+#     Individual's name <submission email address> [alias] <email2> [alias] <emailN>
+#
+# If you wish to keep your @kistler.com address hidden,
+# please still list <@kistler.com> (with no user name)
+# in the list of aliases.
+#
+# (Note: there is no point in hiding it if it is mentioned
+# in the git log already.)
+#
+# For more details about the format, see git-check-mailmap(1)
+#
+# Please keep the list sorted.
+
+Philipp Oehme <philipp.oehme@kistler.com>

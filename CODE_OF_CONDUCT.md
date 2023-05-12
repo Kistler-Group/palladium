@@ -1,0 +1,1 @@
+The Kistler Group's Code of Conduct can be found at the following location: https://www.kistler.com/DE/de/ueber-uns/C00000001
