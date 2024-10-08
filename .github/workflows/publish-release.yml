@@ -1,0 +1,29 @@
+name: Publish release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 8
+      uses: actions/setup-java@v4
+      with:
+        java-version: '8'
+        distribution: 'zulu'
+        server-id: github
+
+    - name: Build
+      run: mvn -B package
+
+    - name: Publish
+      run: mvn deploy
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
