@@ -5,30 +5,42 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.kistler</groupId>
-    <artifactId>Palladium</artifactId>
-    <version>1.3.10-SNAPSHOT</version>
+    <artifactId>palladium</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
 
-    <parent>
-        <groupId>com.AMS.maven</groupId>
-        <artifactId>parent-with-dependencies</artifactId>
-        <version>1.20.4</version>
-    </parent>
+    <profiles>
+        <profile>
+            <id>github</id>
+            <repositories>
+                <repository>
+                    <id>central</id>
+                    <url>https://repo1.maven.org/maven2</url>
+                </repository>
+                <repository>
+                    <id>github</id>
+                    <url>https://maven.pkg.github.com/Kistler-Group/palladium</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
 
-    <repositories>
+    <distributionManagement>
         <repository>
-            <id>AMS Snapshot</id>
-            <name>AMS Snapshot</name>
-            <url>https://sl-ztz-web-1.int.kistler.com:4443/content/repositories/ams_snapshot/</url>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/Kistler-Group/palladium</url>
         </repository>
-        <repository>
-            <id>AMS Release</id>
-            <name>AMS Release</name>
-            <url>https://sl-ztz-web-1.int.kistler.com:4443/content/repositories/ams_release/</url>
-        </repository>
-    </repositories>
+    </distributionManagement>
 
     <properties>
         <com.google.guice.version>4.1.0</com.google.guice.version>
+        <version.com.google.guava.guava>23.0</version.com.google.guava.guava>
+
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -50,10 +62,12 @@
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
+            <version>0.9.11</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <version>2.0.16</version>
         </dependency>
 
         <!-- Test Dependencies -->
@@ -65,11 +79,22 @@
         </dependency>
     </dependencies>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${version.com.google.guava.guava}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -81,7 +106,13 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.10.1</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
