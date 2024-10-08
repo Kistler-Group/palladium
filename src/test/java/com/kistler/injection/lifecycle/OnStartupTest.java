@@ -8,13 +8,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class OnStartupTest {
+class OnStartupTest {
 
     private Injector injector;
 
     @Test
     void testPostConstructCallOnNonSingletonClass() {
-        injector = InjectorFactory.createInjector(Sets.newHashSet("com.AMS.injection"), this);
+        injector = InjectorFactory.createInjector(Sets.newHashSet("com.kistler.injection"), this);
         ClassWithOnStartup instance = injector.getInstance(ClassWithOnStartup.class);
         PalladiumInjector palladiumInjector = injector.getInstance(PalladiumInjector.class);
         palladiumInjector.startup();
@@ -23,7 +23,7 @@ public class OnStartupTest {
 
     @Test
     void testPostConstructCallOnSingletonClass() {
-        injector = InjectorFactory.createInjector(Sets.newHashSet("com.AMS.injection"), this);
+        injector = InjectorFactory.createInjector(Sets.newHashSet("com.kistler.injection"), this);
         SingletonClassWithOnStartup instance = injector.getInstance(SingletonClassWithOnStartup.class);
         PalladiumInjector palladiumInjector = injector.getInstance(PalladiumInjector.class);
         palladiumInjector.startup();

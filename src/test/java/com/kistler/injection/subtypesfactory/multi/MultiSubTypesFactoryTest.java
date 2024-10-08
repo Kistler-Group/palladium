@@ -14,7 +14,7 @@ class MultiSubTypesFactoryTest {
 
     @BeforeEach
     void beforeAll() {
-        injector = InjectorFactory.createInjector(Sets.newHashSet("com.AMS.injection"), this);
+        injector = InjectorFactory.createInjector(Sets.newHashSet("com.kistler.injection"), this);
     }
 
     @Test

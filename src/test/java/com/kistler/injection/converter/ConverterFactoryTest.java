@@ -10,13 +10,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ConverterFactoryTest {
+class ConverterFactoryTest {
     private static final String TEST_NAME = "Sample-123";
     private ConverterFactory converterFactory;
 
     @BeforeEach
     void beforeAll() {
-        Injector injector = InjectorFactory.createInjector(Sets.newHashSet("com.AMS.injection"), this);
+        Injector injector = InjectorFactory.createInjector(Sets.newHashSet("com.kistler.injection"), this);
         converterFactory = injector.getInstance(ConverterFactory.class);
     }
 

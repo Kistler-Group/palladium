@@ -8,13 +8,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PostConstructTest {
+class PostConstructTest {
 
     private Injector injector;
 
     @BeforeEach
     void beforeAll() {
-        injector = InjectorFactory.createInjector(Sets.newHashSet("com.AMS.injection"), this);
+        injector = InjectorFactory.createInjector(Sets.newHashSet("com.kistler.injection"), this);
     }
 
     @Test

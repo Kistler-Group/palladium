@@ -32,7 +32,7 @@ public class InjectorFactory {
 
     public static Injector createSpecificInjector(Set<String> packageNames, Class<? extends Annotation> baseAnnotation, Object... singletons) {
         Set<String> completePackageNames = new HashSet<>(packageNames);
-        completePackageNames.add("com.AMS.injection");
+        completePackageNames.add("com.kistler.injection");
 
         final ClassInjectionValidator classInjectionValidator = new ClassInjectionValidator(completePackageNames);
 
