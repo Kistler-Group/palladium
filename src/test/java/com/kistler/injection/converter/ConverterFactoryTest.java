@@ -5,6 +5,7 @@ import com.kistler.injection.converter.converters.Converter;
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import org.junit.jupiter.api.BeforeEach;
+import org.reflections.Reflections;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,12 +13,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ConverterFactoryTest {
     private static final String TEST_NAME = "Sample-123";
+    private Injector injector;
     private ConverterFactory converterFactory;
 
     @BeforeEach
     void beforeAll() {
-        Injector injector = InjectorFactory.createInjector(Sets.newHashSet("com.kistler.injection"), this);
+        injector = InjectorFactory.createInjector(Sets.newHashSet("com.kistler.injection"), this);
         converterFactory = injector.getInstance(ConverterFactory.class);
+    }
+
+    @Test
+    void testInitialisationWithoutPostConstructModule() throws UnsupportedConversionException, ConversionException {
+        // created outside of Guice, so no PostConstruct listener can initialise it
+        ConverterFactory factory = new DefaultConverterFactory(injector, injector.getInstance(Reflections.class));
+        Converter<ConversionSource, ConversionTarget> converter = factory.getConverter(ConversionSource.class, ConversionTarget.class);
+
+        ConversionSource conversionSource = new ConversionSource();
+        conversionSource.setName(TEST_NAME);
+        assertEquals(TEST_NAME, converter.convert(conversionSource).getName());
     }
 
     @Test

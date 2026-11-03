@@ -14,7 +14,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.reflections.Reflections;
 
-import javax.annotation.PostConstruct;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,6 +23,10 @@ import java.util.Set;
 /**
  * Reflections-based provider of converters Finds and collects converters based on reflections and is in turn used as a
  * clean facade to supply a converter from one model type to a presentation type
+ * <p>
+ * To change how converters are looked up, implement {@link ConverterFactory} and bind it in a module with an
+ * {@link com.kistler.injection.annotation.InjectorBootstrap} constructor. Auto binding does not pick it, as this class
+ * is always found as a second implementation.
  */
 @Singleton
 public class DefaultConverterFactory implements ConverterFactory {
@@ -36,10 +39,11 @@ public class DefaultConverterFactory implements ConverterFactory {
     public DefaultConverterFactory(Injector injector, Reflections reflections) {
         this.injector = injector;
         this.reflections = reflections;
+        // initialised here instead of via @PostConstruct, so it does not depend on javax or jakarta being available
+        init();
     }
 
-    @PostConstruct
-    public void init() {
+    private void init() {
         Set<TypeToken<?>> knownTokens = new HashSet<TypeToken<?>>();
 
         for (Class<? extends Converter> converterClass : reflections.getSubTypesOf(Converter.class)) {

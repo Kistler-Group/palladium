@@ -22,4 +22,16 @@ class PostConstructTest {
         ClassWithPostConstruct instance = injector.getInstance(ClassWithPostConstruct.class);
         assertEquals(ClassWithPostConstruct.CHANGED_CONTENT, instance.getContent());
     }
+
+    @Test
+    void testJakartaPostConstructCall() {
+        ClassWithJakartaPostConstruct instance = injector.getInstance(ClassWithJakartaPostConstruct.class);
+        assertEquals(ClassWithJakartaPostConstruct.CHANGED_CONTENT, instance.getContent());
+    }
+
+    @Test
+    void testBothPostConstructAnnotationsCallOnce() {
+        ClassWithBothPostConstructs instance = injector.getInstance(ClassWithBothPostConstructs.class);
+        assertEquals(1, instance.getCalls());
+    }
 }
