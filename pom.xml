@@ -6,7 +6,7 @@
 
     <groupId>io.github.kistler-group</groupId>
     <artifactId>palladium</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1-SNAPSHOT</version>
 
     <name>Palladium</name>
     <description>Palladium is a DI framework which is based on and enhances Guice.</description>
