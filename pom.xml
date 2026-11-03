@@ -4,36 +4,84 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.kistler</groupId>
+    <groupId>io.github.kistler-group</groupId>
     <artifactId>palladium</artifactId>
     <version>2.0.0-SNAPSHOT</version>
 
+    <name>Palladium</name>
+    <description>Palladium is a DI framework which is based on and enhances Guice.</description>
+    <url>https://github.com/Kistler-Group/palladium</url>
+
+    <organization>
+        <name>Kistler Group</name>
+        <url>https://www.kistler.com</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Philipp Oehme</name>
+            <email>philipp.oehme@kistler.com</email>
+            <organization>Kistler Group</organization>
+            <organizationUrl>https://www.kistler.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/Kistler-Group/palladium.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/Kistler-Group/palladium.git</developerConnection>
+        <url>https://github.com/Kistler-Group/palladium</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/Kistler-Group/palladium/issues</url>
+    </issueManagement>
+
     <profiles>
+        <!-- Signs the artifacts and publishes them to Maven Central: mvn -P release deploy -->
         <profile>
-            <id>github</id>
-            <repositories>
-                <repository>
-                    <id>central</id>
-                    <url>https://repo1.maven.org/maven2</url>
-                </repository>
-                <repository>
-                    <id>github</id>
-                    <url>https://maven.pkg.github.com/Kistler-Group/palladium</url>
-                    <snapshots>
-                        <enabled>true</enabled>
-                    </snapshots>
-                </repository>
-            </repositories>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.8</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.12.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>published</waitUntil>
+                            <waitMaxTime>3600</waitMaxTime>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
-
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/Kistler-Group/palladium</url>
-        </repository>
-    </distributionManagement>
 
     <properties>
         <com.google.guice.version>4.1.0</com.google.guice.version>
@@ -41,6 +89,7 @@
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>

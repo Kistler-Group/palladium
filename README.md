@@ -1,8 +1,20 @@
 # Palladium
 Palladium is a DI framework which is based on and enhances Guice.
 
+## Installation
+Palladium is published to Maven Central:
+
+```xml
+<dependency>
+    <groupId>io.github.kistler-group</groupId>
+    <artifactId>palladium</artifactId>
+    <version>2.0.0</version>
+</dependency>
+```
+
+## Usage
 The entry point for Palladium is the InjectorFactory.
-To create an injector and initialise the automatic binding, use InjectorFactory.createInjector(String packageName).
+To create an injector and initialise the automatic binding, use InjectorFactory.createInjector(Set<String> packageNames, Object... singletons).
 
 ## Enhancements
 
@@ -56,7 +68,7 @@ public class MockedTestService extends DefaultService {
 ```
 
 ### SubTypesFactory
-Palladium also includes a Subtypes-functionality. Interfaces can be marked with the `@SubtypesConstructable` annotation to mark them as usable for the SubTypesFactory classes.
+Palladium also includes a Subtypes-functionality. Interfaces can be marked with the `@SubTypeConstructable` annotation to mark them as usable for the SubTypesFactory classes.
 SubTypesFactories require a base interface and a "Key Extractor" which determines which implementation of the interface is returned for which requesting "key".
 
 ##### Example
