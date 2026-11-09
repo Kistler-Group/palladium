@@ -27,6 +27,9 @@ This method does not support assisted injection in any form as of now.
 ##### Scoping
 Palladium uses the default guice scoping mechanisms. @Singleton is automatically regarded during injector calls and constructor/field injection.
 Furthermore, @EagerSingleton can be used to bind classes for eager initialisation.
+Since 2.1.0, the annotated class itself is bound as eager singleton, so that the class and all its interfaces share one instance, and so that a class without an interface is created as well.
+A module may therefore not bind the class itself any more (e.g. `bind(ServiceImpl.class)` or a `@Provides ServiceImpl` method); remove the annotation or use `@ExcludeFromAutoBinding` in that case.
+Methods annotated with @OnStartup only run on instances that exist at startup, so a singleton that nothing injects before startup has to be an @EagerSingleton.
 For more information, please visit https://github.com/google/guice/wiki/Scopes
 
 ##### Exclusions
