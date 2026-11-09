@@ -1,7 +1,7 @@
 package com.kistler.injection.lifecycle;
 
-import com.kistler.injection.annotation.ExcludeFromAutoBinding;
 import com.google.common.collect.ImmutableList;
+import com.kistler.injection.annotation.ExcludeFromAutoBinding;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -20,7 +20,8 @@ public class InstanceRegistry {
     }
 
     List<Object> getMethodTargets(Class<? extends Annotation> annotation, Method method) {
-        ConcurrentLinkedQueue<Object> elements = instances.get(annotation).get(method);
+        // Nothing is registered for an annotation until a first instance with a matching method has been injected.
+        ConcurrentLinkedQueue<Object> elements = instances.getOrDefault(annotation, Collections.emptyMap()).get(method);
         if (elements == null) {
             return Collections.emptyList();
         } else {

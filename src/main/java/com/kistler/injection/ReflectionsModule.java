@@ -1,10 +1,5 @@
 package com.kistler.injection;
 
-import com.kistler.injection.annotation.EagerSingleton;
-import com.kistler.injection.annotation.EnforceTestImplementationBinding;
-import com.kistler.injection.annotation.ExcludeFromAutoBinding;
-import com.kistler.injection.annotation.InjectorBootstrap;
-import com.kistler.injection.subtypefactory.type.TypeTokenUtils;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -15,6 +10,11 @@ import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
+import com.kistler.injection.annotation.EagerSingleton;
+import com.kistler.injection.annotation.EnforceTestImplementationBinding;
+import com.kistler.injection.annotation.ExcludeFromAutoBinding;
+import com.kistler.injection.annotation.InjectorBootstrap;
+import com.kistler.injection.subtypefactory.type.TypeTokenUtils;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,17 +31,17 @@ import java.util.Set;
 
 /**
  * Prime module of the palladium project.
- *
+ * <p>
  * Automatically checks all classes that either have a default constructor or a constructor annotated with @Inject for their interfaces
  * If there is a 1:1 relationship between interface and class, this module automatically binds the implementation.
- *
+ * <p>
  * This enables very easy access to using Dependency Injection, in principle without creating a single individual module
  */
 public class ReflectionsModule extends AbstractModule {
-    private final Logger                  logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private final ClassInjectionValidator classInjectionValidator;
-    private final Reflections             reflections;
-    private final BootstrapModule         bootstrapModule;
+    private final Reflections reflections;
+    private final BootstrapModule bootstrapModule;
 
     @InjectorBootstrap
     private ReflectionsModule(ClassInjectionValidator classInjectionValidator, Reflections reflections, BootstrapModule bootstrapModule) {
@@ -79,6 +79,7 @@ public class ReflectionsModule extends AbstractModule {
 
         //Checks every found class
         int count = 0;
+        Set<TypeLiteral<?>> eagerSingletons = new LinkedHashSet<>();
         for (Key<?> key : implementations.rowKeySet()) {
             Class<?> cls = key.getTypeLiteral().getRawType();
 
@@ -88,18 +89,34 @@ public class ReflectionsModule extends AbstractModule {
                 TypeLiteral<?> target = select(candidates);
                 if (target != null
                         && !bootstrapModule.isBootstrapped(TypeToken.of(target.getType()))
-                        && (key.getAnnotation() != null || !key.getTypeLiteral().equals(target))
                         && hasNoExcludeAnnotation(cls)) {
-                    logger.trace("Binding {} from {}.", target, key);
-
-                    //Binds classes to their interfaces, checks for EagerSingleton
-                    ScopedBindingBuilder bindingBuilder = bind(key).to((TypeLiteral) target);
-                    if (cls.isAnnotationPresent(EagerSingleton.class) || (target.getRawType().isAnnotationPresent(EagerSingleton.class) && !key.getTypeLiteral().equals(target))) {
-                        bindingBuilder.asEagerSingleton();
+                    //The annotation may be on the key, e.g. when a test implementation replaces an eager singleton
+                    boolean eager = cls.isAnnotationPresent(EagerSingleton.class) || target.getRawType().isAnnotationPresent(EagerSingleton.class);
+                    if (eager) {
+                        eagerSingletons.add(target);
                     }
-                    count++;
+                    if (key.getAnnotation() != null || !key.getTypeLiteral().equals(target)) {
+                        logger.trace("Binding {} from {}.", target, key);
+
+                        //Binds classes to their interfaces. The scope of an annotated implementation is kept on the interface
+                        //binding as well, so that an identical binding in a module is deduplicated by Guice instead of
+                        //rejected. All interfaces still share one instance through the binding of the implementation below.
+                        ScopedBindingBuilder bindingBuilder = bind(key).to((TypeLiteral) target);
+                        if (eager) {
+                            bindingBuilder.asEagerSingleton();
+                        }
+                        count++;
+                    }
                 }
             }
+        }
+
+        //Binds each eager singleton once, so that all its interfaces share one instance, and so that a class without an
+        //interface is created at all
+        for (TypeLiteral<?> target : eagerSingletons) {
+            logger.trace("Binding {} as eager singleton.", target);
+            bind(target).asEagerSingleton();
+            count++;
         }
         logger.info("Identified a total of {} bindings from {} possibilities.", count, implementations.size());
     }

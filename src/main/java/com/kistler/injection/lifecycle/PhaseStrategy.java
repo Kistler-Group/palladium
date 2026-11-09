@@ -18,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -29,10 +30,11 @@ import java.util.Set;
  * presents a hook that can be called to start a global phase and execute the associated methods
  */
 public abstract class PhaseStrategy<T extends Annotation> {
-    private final Logger      logger = LoggerFactory.getLogger(getClass());
-    private final Injector    injector;
-    private final Reflections reflections;
-    private final Method      initialPredecessor;
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Injector injector;
+    protected final Reflections reflections;
+
+    private final Method initialPredecessor;
 
     @Inject
     public PhaseStrategy(Injector injector, Reflections reflections) {
@@ -135,23 +137,49 @@ public abstract class PhaseStrategy<T extends Annotation> {
     private void invokeMethods(Class<T> phaseAnnotation, Collection<Method> sortedMethods) {
         InstanceRegistry instanceRegistry = injector.getInstance(InstanceRegistry.class);
         for (Method method : sortedMethods) {
-            if (!Modifier.isStatic(method.getModifiers())) {
-                List<Object> methodTargets = instanceRegistry.getMethodTargets(phaseAnnotation, method);
+            List<Object> methodTargets = findMethodTargets(instanceRegistry, phaseAnnotation, method);
 
-                for (Object methodTarget : methodTargets) {
-                    method.setAccessible(true);
-                    try {
-                        logger.info("Entring phase {}. Executing {}...", phaseAnnotation, method);
-                        method.invoke(methodTarget);
-                    } catch (IllegalAccessException e) {
-                        logger.error("Error while entering phase {}.", phaseAnnotation, e);
-                    } catch (InvocationTargetException e) {
-                        logger.error("Error while entering phase {}.", phaseAnnotation, e);
-                    } finally {
-                        method.setAccessible(false);
-                    }
+            for (Object methodTarget : methodTargets) {
+                method.setAccessible(true);
+                try {
+                    logger.info("Entring phase {}. Executing {}...", phaseAnnotation, method);
+                    method.invoke(methodTarget);
+                } catch (IllegalAccessException e) {
+                    logger.error("Error while entering phase {}.", phaseAnnotation, e);
+                } catch (InvocationTargetException e) {
+                    logger.error("Error while entering phase {}.", phaseAnnotation, e);
+                } finally {
+                    method.setAccessible(false);
                 }
             }
         }
+    }
+
+    /**
+     * Phase methods only run on instances the injector has created, and only public instance methods are registered for
+     * them (see {@link LifecycleModule}). These cases are logged rather than skipped silently.
+     */
+    private List<Object> findMethodTargets(InstanceRegistry instanceRegistry, Class<T> phaseAnnotation, Method method) {
+        if (Modifier.isStatic(method.getModifiers())) {
+            logger.warn("{} is static and is therefore never executed for @{}.", method, phaseAnnotation.getSimpleName());
+            return Collections.emptyList();
+        }
+        if (!Modifier.isPublic(method.getModifiers())) {
+            logger.warn("{} is not public and is therefore never executed for @{}.", method, phaseAnnotation.getSimpleName());
+            return Collections.emptyList();
+        }
+        List<Object> methodTargets = instanceRegistry.getMethodTargets(phaseAnnotation, method);
+        if (methodTargets.isEmpty()) {
+            reportMissingInstance(phaseAnnotation, method);
+        }
+        return methodTargets;
+    }
+
+    /**
+     * Called for a public phase method of a class that has no instance. Logs at debug level by default, since e.g. a
+     * singleton that was never used has nothing to shut down.
+     */
+    protected void reportMissingInstance(Class<T> phaseAnnotation, Method method) {
+        logger.debug("Skipping {} for @{}, as no instance of {} has been created.", method, phaseAnnotation.getSimpleName(), method.getDeclaringClass().getName());
     }
 }
